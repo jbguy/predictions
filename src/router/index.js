@@ -100,6 +100,19 @@ export const constantRouterMap = [
         meta: { title: 'guide', icon: 'guide', noCache: true }
       }
     ]
+  },
+  {
+    path: '/matchs',
+    component: Layout,
+    redirect: '/matchs/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/matchs/list'),
+        name: 'Matchs',
+        meta: { title: 'guide', icon: 'guide', noCache: true }
+      }
+    ]
   }
 ]
 
