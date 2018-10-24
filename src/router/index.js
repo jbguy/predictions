@@ -110,7 +110,20 @@ export const constantRouterMap = [
         path: 'index',
         component: () => import('@/views/matchs/list'),
         name: 'Matchs',
-        meta: { title: 'guide', icon: 'guide', noCache: true }
+        meta: { title: 'Matchs', icon: 'guide', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/work',
+    component: Layout,
+    redirect: '/work/index',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/matchs/work'),
+        name: 'Work',
+        meta: { title: 'Work', icon: 'guide', noCache: true }
       }
     ]
   }

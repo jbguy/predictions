@@ -20,7 +20,7 @@
 
       <el-table-column align="center" label="Date" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.Date }}</span>
+          <span>{{ scope.row.date }}</span>
         </template>
       </el-table-column>
 
@@ -80,7 +80,7 @@ export default {
       globalResult: 0,
       nbParis: 0,
       ratioResults: 0,
-      matchs: matchsJson.slice(0, 5000)
+      matchs: matchsJson.slice(0, 50)
     }
   },
   created() {
@@ -89,9 +89,6 @@ export default {
   methods: {
     getList() {
       this.matchs = this.matchs.map((m) => {
-        m.oddHome = m.oddHome.toString().replace(',', '.')
-        m.oddAway = m.oddAway.toString().replace(',', '.')
-
         this.$set(m, 'oddResult', 0)
 
         // Home Bet
