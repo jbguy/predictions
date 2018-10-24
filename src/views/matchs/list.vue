@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     Global : {{ globalResult }} €
-    Paris : {{ nbParis }}
+    Paris : {{ nbWin }} / {{ nbParis }}
     Ratio : {{ ratioResults * 100 }} %
     <!-- Note that row-key is necessary to get a correct row order. -->
     <el-table :data="matchs" border fit highlight-current-row style="width: 100%">
@@ -26,7 +26,7 @@
 
       <el-table-column align="center" label="H Odd" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.oddHome }}</span>
+          <span>{{ ( scope.row.oddHome) }}</span>
         </template>
       </el-table-column>
 
@@ -75,12 +75,13 @@ export default {
   data() {
     return {
       amountByBet: 1,
-      betHome: 0.55,
-      betAway: 0.45,
+      betHome: 0.60,
+      betAway: 0.40,
       globalResult: 0,
+      nbWin: 0,
       nbParis: 0,
       ratioResults: 0,
-      matchs: matchsJson.slice(0, 50)
+      matchs: matchsJson.slice(0, 1230)
     }
   },
   created() {
@@ -90,18 +91,24 @@ export default {
     getList() {
       this.matchs = this.matchs.map((m) => {
         this.$set(m, 'oddResult', 0)
+        this.$set(m, 'homeBet', '')
+        this.$set(m, 'awayBet', '')
 
         // Home Bet
-        if ((1 / Number(m.oddHome)) < this.betHome) {
+        if ((1 / Number(m.oddHome)) > this.betHome * 1.05) {
           this.$set(m, 'homeBet', true)
-          this.$set(m, 'oddResult', m.scoreResult === 'H' ? this.round2Decimals(this.amountByBet * m.oddHome - this.amountByBet) : this.round2Decimals(-this.amountByBet))
+          const bet = this.amountByBet * (1 / Number(m.oddHome))
+          this.$set(m, 'oddResult', m.scoreResult === 'H' ? this.round2Decimals(bet * m.oddHome - bet) : this.round2Decimals(-bet))
+          if (m.scoreResult === 'H') { this.nbWin++ }
           this.nbParis++
         }
 
         // Away Bet
-        if ((1 / Number(m.oddAway)) < this.betAway) {
+        if ((1 / Number(m.oddAway)) > this.betAway * 1.05) {
           this.$set(m, 'awayBet', true)
-          this.$set(m, 'oddResult', m.scoreResult === 'A' ? this.round2Decimals(this.amountByBet * m.oddAway - this.amountByBet) : this.round2Decimals(-this.amountByBet))
+          const bet = this.amountByBet * (1 / Number(m.oddAway))
+          this.$set(m, 'oddResult', m.scoreResult === 'A' ? this.round2Decimals(bet * m.oddAway - bet) : this.round2Decimals(-bet))
+          if (m.scoreResult === 'A') { this.nbWin++ }
           this.nbParis++
         }
 

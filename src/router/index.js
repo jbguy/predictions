@@ -126,6 +126,29 @@ export const constantRouterMap = [
         meta: { title: 'Work', icon: 'guide', noCache: true }
       }
     ]
+  },
+  {
+    path: '/team',
+    component: Layout,
+    redirect: '/team/list',
+    meta: {
+      title: 'Team',
+      icon: 'nested'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/team/list'),
+        name: 'team_list',
+        meta: { title: 'List', icon: 'table', noCache: true }
+      }, {
+        path: 'match/:season/:team',
+        component: () => import('@/views/team/match'),
+        name: 'team_match',
+        props: true,
+        meta: { title: 'Match', icon: 'guide', noCache: true }
+      }
+    ]
   }
 ]
 

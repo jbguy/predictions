@@ -8,7 +8,7 @@
 
 <script>
 import matchsJson from '../../../static/data/nba.json'
-import { matchFilterSeasonTeam } from '@/utils/filters'
+import { matchFilterSeasonTeam, matchFilterSeason } from '@/utils/filters'
 
 export default {
   name: 'Work',
@@ -16,31 +16,31 @@ export default {
   data() {
     return {
       matchs: matchsJson,
-      teamList: ['ATL', 'HOU', 'GSW', 'MEM']
+      teamList: ['DET', 'CHI', 'IND', 'CHA', 'ATL', 'HOU', 'GSW', 'MEM', 'LAC', 'LAL', 'UTA', 'POR', 'SAC', 'MIA', 'NYK', 'CLE', 'SAS', 'DAL', 'MIN', 'TOR', 'DEN', 'NOP', 'BOS', 'BKN', 'ORL', 'WAS', 'MIL', 'OKC', 'PHI', 'PHX']
     }
   },
   created() {
+    console.log(this.teamList.length)
     this.teamList.forEach((t) => {
-      console.log(t)
-      console.log(matchFilterSeasonTeam(this.matchs, '2017/2018', t))
+      console.log(t + ' => ' + matchFilterSeasonTeam(this.matchs, '2017-2018', t).length)
+      console.log()
     })
   },
   methods: {
-    m1718(team) {
-      return matchFilterSeasonTeam(this.matchs, '2017/2018', team)
+    m1718() {
+      return matchFilterSeason(this.matchs, '2017-2018')
     },
     updateData() {
-      const start = new Date('20/09/2017')
-      const end = new Date('18/10/2017')
       this.matchs = this.matchs.map((m) => {
-        const matchDate = new Date(m.date)
-        console.log(matchDate)
-        if (matchDate > start && matchDate < end) {
-          console.log(m)
-        }
+        console.log()
+        console.log(m.date.substring(3, 5))
+        console.log(m.date.substring(6, 10))
+
+        this.$set(m, 'date', m.date.substring(3, 5) + '/' + m.date.substring(0, 2) + '/' + m.date.substring(6, 10))
+        return m
       })
 
-      // console.log(JSON.stringify(this.matchs))
+      console.log(JSON.stringify(this.matchs))
     },
     getList() {
       this.matchs = this.matchs.map((m) => {
