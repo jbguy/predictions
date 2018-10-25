@@ -13,13 +13,25 @@
 
       <el-table-column align="center" label="Home" width="100" >
         <template slot-scope="scope">
-          <el-button @click.native="goToTeam(scope.row.teamHomeShort)">{{ scope.row.teamHomeShort }}</el-button>
+          <span>{{ scope.row.teamHomeShort }}</span>
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="Away" width="100">
         <template slot-scope="scope">
-          <el-button @click.native="goToTeam(scope.row.teamAwayShort)">{{ scope.row.teamAwayShort }}</el-button>
+          <span>{{ scope.row.teamAwayShort }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="Home" width="100" >
+        <template slot-scope="scope">
+          <span>{{ scope.row.ratio.home.previous.ratioWin }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="Away" width="100">
+        <template slot-scope="scope">
+          <span>{{ scope.row.ratio.away.previous.ratioWin }}</span>
         </template>
       </el-table-column>
 
@@ -56,6 +68,7 @@ export default {
     team: { type: String, default: '' }
   },
   created() {
+    console.log(this.data)
   },
   methods: {
     round2Decimals(number) {

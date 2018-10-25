@@ -9,6 +9,7 @@
 <script>
 import matchsJson from '../../../static/data/nba.json'
 import { matchFilterSeasonTeam, matchFilterSeason } from '@/utils/filters'
+import { setWinRatio } from '@/utils/sport'
 
 export default {
   name: 'Work',
@@ -16,6 +17,7 @@ export default {
   data() {
     return {
       matchs: matchsJson,
+      seasonList: ['2009-2010', '2010-2011', '2011-2012', '2012-2013', '2013-2014', '2014-2015', '2015-2016', '2016-2017', '2017-2018'],
       teamList: ['DET', 'CHI', 'IND', 'CHA', 'ATL', 'HOU', 'GSW', 'MEM', 'LAC', 'LAL', 'UTA', 'POR', 'SAC', 'MIA', 'NYK', 'CLE', 'SAS', 'DAL', 'MIN', 'TOR', 'DEN', 'NOP', 'BOS', 'BKN', 'ORL', 'WAS', 'MIL', 'OKC', 'PHI', 'PHX']
     }
   },
@@ -31,13 +33,17 @@ export default {
       return matchFilterSeason(this.matchs, '2017-2018')
     },
     updateData() {
-      this.matchs = this.matchs.map((m) => {
-        console.log()
-        console.log(m.date.substring(3, 5))
-        console.log(m.date.substring(6, 10))
+      console.log(this.matchs.splice(10))
+      // this.matchs = this.matchs.map((m) => {
+      //   console.log()
+      //   console.log(m.date.substring(3, 5))
+      //   console.log(m.date.substring(6, 10))
 
-        this.$set(m, 'date', m.date.substring(3, 5) + '/' + m.date.substring(0, 2) + '/' + m.date.substring(6, 10))
-        return m
+      //   this.$set(m, 'date', m.date.substring(3, 5) + '/' + m.date.substring(0, 2) + '/' + m.date.substring(6, 10))
+      //   return m
+      // })
+      this.matchs = this.matchs.map((m) => {
+        return setWinRatio(this.matchs, m)
       })
 
       console.log(JSON.stringify(this.matchs))
