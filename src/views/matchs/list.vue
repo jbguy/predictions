@@ -18,6 +18,18 @@
         </template>
       </el-table-column>
 
+      <el-table-column align="center" label="Home 10 Last" width="100">
+        <template slot-scope="scope">
+          <span>{{ scope.row.ratio.home.previous10.ratioWin }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="Away 10 Last" width="100">
+        <template slot-scope="scope">
+          <span>{{ scope.row.ratio.away.previous10.ratioWin }}</span>
+        </template>
+      </el-table-column>
+
       <el-table-column align="center" label="Date" width="100">
         <template slot-scope="scope">
           <span>{{ scope.row.date }}</span>
@@ -42,21 +54,33 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="Home bet" width="100">
+      <el-table-column align="center" label="Home bet" width="60">
         <template slot-scope="scope">
-          <span>{{ scope.row.homeBet }}</span>
+          <span>{{ scope.row.bet.home.bet }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="Away bet" width="100">
+      <el-table-column align="center" label="Away bet" width="60">
         <template slot-scope="scope">
-          <span>{{ scope.row.awayBet }}</span>
+          <span>{{ scope.row.bet.away.bet }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="Profit home" width="60">
+        <template slot-scope="scope">
+          <span>{{ scope.row.bet.home.profit }} €</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="Profit away" width="60">
+        <template slot-scope="scope">
+          <span>{{ scope.row.bet.away.profit }} €</span>
         </template>
       </el-table-column>
 
       <el-table-column align="center" label="Odd result" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.oddResult }} €</span>
+          <span>{{ scope.row.bet.total.profit }} €</span>
         </template>
       </el-table-column>
 
@@ -81,7 +105,7 @@ export default {
       nbWin: 0,
       nbParis: 0,
       ratioResults: 0,
-      matchs: matchsJson.slice(0, 1230)
+      matchs: matchsJson.slice(0, 1000)
     }
   },
   created() {
@@ -95,35 +119,64 @@ export default {
         this.$set(m, 'awayBet', '')
 
         // Home Bet
-        if ((1 / Number(m.oddHome)) > this.betHome * 1.05) {
-          this.$set(m, 'homeBet', true)
-          const bet = this.amountByBet * (1 / Number(m.oddHome))
-          this.$set(m, 'oddResult', m.scoreResult === 'H' ? this.round2Decimals(bet * m.oddHome - bet) : this.round2Decimals(-bet))
-          if (m.scoreResult === 'H') { this.nbWin++ }
-          this.nbParis++
-        }
+        this.$set(m, 'bet', this.betOnThisMatch(m))
 
         // Away Bet
-        if ((1 / Number(m.oddAway)) > this.betAway * 1.05) {
-          this.$set(m, 'awayBet', true)
-          const bet = this.amountByBet * (1 / Number(m.oddAway))
-          this.$set(m, 'oddResult', m.scoreResult === 'A' ? this.round2Decimals(bet * m.oddAway - bet) : this.round2Decimals(-bet))
-          if (m.scoreResult === 'A') { this.nbWin++ }
-          this.nbParis++
-        }
+        // if ((1 / Number(m.oddAway)) > this.betAway * 1.05) {
+        //   this.$set(m, 'awayBet', true)
+        //   const bet = this.amountByBet * (1 / Number(m.oddAway))
+        //   this.$set(m, 'oddResult', m.scoreResult === 'A' ? this.round2Decimals(bet * m.oddAway - bet) : this.round2Decimals(-bet))
+        //   if (m.scoreResult === 'A') { this.nbWin++ }
+        //   this.nbParis++
+        // }
 
         return m
       })
+      this.nbParis = this.matchs.filter((m) => m.bet.total.bet).length
 
       this.globalResult = 0
       this.matchs.forEach((m) => {
-        this.globalResult = this.globalResult + m.oddResult
+        this.globalResult = this.globalResult + m.bet.total.profit
       })
       this.globalResult = this.round2Decimals(this.globalResult)
       this.ratioResults = this.round2Decimals(this.globalResult / this.nbParis)
     },
     round2Decimals(number) {
       return (Math.round(number * 100) / 100)
+    },
+    betOnThisMatch(match) {
+      const res = {
+        home: { bet: false, ammount: 1, win: false, profit: 0 },
+        away: { bet: false, ammount: 1, win: false, profit: 0 }
+      }
+      const ammount = this.amountByBet
+      // if ((1 / Number(match.oddHome)) > this.betHome * 1.05) {
+      if (match.ratio.home.previous10.ratioWin >= match.ratio.away.previous10.ratioWin) {
+        res.home = {
+          bet: true,
+          ammount: ammount,
+          win: match.scoreResult === 'H',
+          profit: match.scoreResult === 'H' ? this.round2Decimals(ammount * match.oddHome - ammount) : this.round2Decimals(-ammount)
+        }
+      }
+
+      // if ((1 / Number(match.oddAway)) > this.betAway * 1.05) {
+      if (match.ratio.home.previous10.ratioWin < match.ratio.away.previous10.ratioWin) {
+        res.away = {
+          bet: true,
+          ammount: ammount,
+          win: match.scoreResult === 'A',
+          profit: match.scoreResult === 'A' ? this.round2Decimals(ammount * match.oddAway - ammount) : this.round2Decimals(-ammount)
+        }
+      }
+
+      res.total = {
+        bet: res.home.bet || res.away.bet,
+        ammount: res.home.ammount + res.away.ammount,
+        profit: this.round2Decimals(res.home.profit + res.away.profit)
+      }
+
+      return res
     }
 
   }
