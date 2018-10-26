@@ -3,16 +3,18 @@
     Global : {{ globalResult }} €
     Paris : {{ nbWin }} / {{ nbParis }}
     Ratio : {{ ratioResults * 100 }} %
-    <!-- Note that row-key is necessary to get a correct row order. -->
-    <el-table :data="matchs" border fit highlight-current-row style="width: 100%">
 
-      <el-table-column align="center" label="Home" width="100">
+    {{ diff }}
+    <!-- Note that row-key is necessary to get a correct row order. -->
+    <el-table v-if="matchs.length < 100" :data="matchs" border fit highlight-current-row style="width: 100%">
+
+      <el-table-column align="center" label="Home" width="200">
         <template slot-scope="scope">
           <span>{{ scope.row.teamHome }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="Away" width="100">
+      <el-table-column align="center" label="Away" width="200">
         <template slot-scope="scope">
           <span>{{ scope.row.teamAway }}</span>
         </template>
@@ -87,6 +89,14 @@
     </el-table>
     <!-- $t is vue-i18n global function to translate lang (lang in @/lang)  -->
 
+    <table >
+      <tr v-for="(n, k) in diff" :key="k">
+        <td>{{ k }}</td>
+        <td>{{ n['nb'] }}</td>
+        <td>{{ n['win'] }}</td>
+      </tr>
+    </table>
+
   </div>
 </template>
 
@@ -105,7 +115,12 @@ export default {
       nbWin: 0,
       nbParis: 0,
       ratioResults: 0,
-      matchs: matchsJson.slice(0, 1000)
+      matchs: matchsJson.slice(0, 10000),
+      diff: {
+        '-1': { nb: 0, win: 0 }, '-0.9': { nb: 0, win: 0 }, '-0.8': { nb: 0, win: 0 }, '-0.7': { nb: 0, win: 0 }, '-0.6': { nb: 0, win: 0 }, '-0.5': { nb: 0, win: 0 }, '-0.4': { nb: 0, win: 0 }, '-0.3': { nb: 0, win: 0 }, '-0.2': { nb: 0, win: 0 }, '-0.1': { nb: 0, win: 0 },
+        '0': { nb: 0, win: 0 }, '0.1': { nb: 0, win: 0 }, '0.2': { nb: 0, win: 0 }, '0.3': { nb: 0, win: 0 }, '0.4': { nb: 0, win: 0 }, '0.5': { nb: 0, win: 0 }, '0.6': { nb: 0, win: 0 }, '0.7': { nb: 0, win: 0 }, '0.8': { nb: 0, win: 0 }, '0.9': { nb: 0, win: 0 }, '1': { nb: 0, win: 0 }
+      }
+
     }
   },
   created() {
@@ -120,6 +135,14 @@ export default {
 
         // Home Bet
         this.$set(m, 'bet', this.betOnThisMatch(m))
+        const diff = this.round2Decimals(m.ratio.home.previous10.ratioWin - m.ratio.away.previous10.ratioWin)
+        console.log(diff)
+        if (this.diff[diff] !== undefined) {
+          this.diff[diff] = {
+            nb: this.diff[diff]['nb'] + 1,
+            win: (m.scoreResult === 'H' ? this.diff[diff]['win'] + 1 : this.diff[diff]['win'])
+          }
+        }
 
         // Away Bet
         // if ((1 / Number(m.oddAway)) > this.betAway * 1.05) {
@@ -134,6 +157,8 @@ export default {
       })
       this.nbParis = this.matchs.filter((m) => m.bet.total.bet).length
 
+      this.nbWin = this.matchs.filter((m) => m.bet.total.profit > 0).length
+
       this.globalResult = 0
       this.matchs.forEach((m) => {
         this.globalResult = this.globalResult + m.bet.total.profit
@@ -146,22 +171,26 @@ export default {
     },
     betOnThisMatch(match) {
       const res = {
-        home: { bet: false, ammount: 1, win: false, profit: 0 },
-        away: { bet: false, ammount: 1, win: false, profit: 0 }
-      }
-      const ammount = this.amountByBet
-      // if ((1 / Number(match.oddHome)) > this.betHome * 1.05) {
-      if (match.ratio.home.previous10.ratioWin >= match.ratio.away.previous10.ratioWin) {
-        res.home = {
-          bet: true,
-          ammount: ammount,
-          win: match.scoreResult === 'H',
-          profit: match.scoreResult === 'H' ? this.round2Decimals(ammount * match.oddHome - ammount) : this.round2Decimals(-ammount)
-        }
+        home: { bet: false, ammount: 0, win: false, profit: 0 },
+        away: { bet: false, ammount: 0, win: false, profit: 0 }
       }
 
+      const ammount = this.amountByBet
+
+      // if ((1 / Number(match.oddHome)) > this.betHome * 1.05) {
+      // if ((match.ratio.home.previous10.ratioWin - match.ratio.away.previous10.ratioWin) > 0.8) {
+      //   // const ammount = (2 / (match.oddHome - 1))
+      //   res.home = {
+      //     bet: true,
+      //     ammount: ammount,
+      //     win: match.scoreResult === 'H',
+      //     profit: match.scoreResult === 'H' ? this.round2Decimals(ammount * match.oddHome - ammount) : this.round2Decimals(-ammount)
+      //   }
+      // }
+
       // if ((1 / Number(match.oddAway)) > this.betAway * 1.05) {
-      if (match.ratio.home.previous10.ratioWin < match.ratio.away.previous10.ratioWin) {
+      if ((match.ratio.home.previous10.ratioWin - match.ratio.away.previous10.ratioWin) > 0.8) {
+        // const ammount = (2 / (match.oddAway - 1))
         res.away = {
           bet: true,
           ammount: ammount,
